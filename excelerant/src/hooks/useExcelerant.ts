@@ -2,7 +2,14 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { ExcelerantContext } from "../contexts/ExcelerantContext";
 
 type ExcelerantChamber = "grow" | "bloom";
-type ExcelerantEvent = "temperature" | "humidity" | "fanSpeed" | "power";
+type ExcelerantEvent =
+  | "temperature"
+  | "humidity"
+  | "fanSpeed"
+  | "exposure"
+  | "power";
+export type Time = { hour: number; minute: number };
+export type ExposureRange = { start: Time; duration: Time };
 
 function sendEvent<T>(
   websocket: WebSocket,
@@ -20,13 +27,13 @@ function sendEvent<T>(
 
 export function useExcelerant(): {
   growTemperature: number;
-  sendGrowTemperature: (temperature: Number) => void;
   bloomTemperature: number;
-  sendBloomTemperature: (temperature: Number) => void;
   growHumidity: number;
-  sendGrowHumidity: (humidity: Number) => void;
   bloomHumidity: number;
-  sendBloomHumidity: (humidity: Number) => void;
+  growExposure: ExposureRange;
+  sendGrowExposure: (exposure: ExposureRange) => void;
+  bloomExposure: ExposureRange;
+  sendBloomExposure: (exposure: ExposureRange) => void;
   growPower: boolean;
   sendGrowPower: (hasPower: boolean) => void;
   bloomPower: boolean;
@@ -42,6 +49,26 @@ export function useExcelerant(): {
   const [growPower, setGrowPower] = useState(false);
   const [bloomPower, setBloomPower] = useState(false);
   const [fanSpeed, setFanSpeed] = useState(0);
+  const [growExposure, setGrowExposure] = useState<ExposureRange>({
+    start: {
+      hour: 0,
+      minute: 0,
+    },
+    duration: {
+      hour: 0,
+      minute: 0,
+    },
+  });
+  const [bloomExposure, setBloomExposure] = useState<ExposureRange>({
+    start: {
+      hour: 0,
+      minute: 0,
+    },
+    duration: {
+      hour: 0,
+      minute: 0,
+    },
+  });
 
   useEffect(() => {
     excelerant.onmessage = (ev) => {
@@ -63,35 +90,19 @@ export function useExcelerant(): {
             ? setGrowPower(event.value)
             : setBloomPower(event.value);
           break;
+        case "exposure":
+          chamber === "grow"
+            ? setGrowExposure(event.value)
+            : setBloomExposure(event.value);
+          break;
         case "fanspeed":
           setFanSpeed(event.value);
+          break;
         default:
           console.log(`Failed to parse event ${JSON.stringify(event)}`);
       }
     };
   }, [excelerant]);
-
-  const sendGrowTemperature = useCallback(
-    (temperature: Number) =>
-      sendEvent(excelerant, "temperature", temperature, "grow"),
-    [excelerant]
-  );
-
-  const sendBloomTemperature = useCallback(
-    (temperature: Number) =>
-      sendEvent(excelerant, "temperature", temperature, "bloom"),
-    [excelerant]
-  );
-
-  const sendGrowHumidity = useCallback(
-    (humidity: Number) => sendEvent(excelerant, "humidity", humidity, "grow"),
-    [excelerant]
-  );
-
-  const sendBloomHumidity = useCallback(
-    (humidity: Number) => sendEvent(excelerant, "humidity", humidity, "bloom"),
-    [excelerant]
-  );
 
   const sendGrowPower = useCallback(
     (hasPower: boolean) => sendEvent(excelerant, "power", hasPower, "grow"),
@@ -103,6 +114,18 @@ export function useExcelerant(): {
     [excelerant]
   );
 
+  const sendGrowExposure = useCallback(
+    (exposure: ExposureRange) =>
+      sendEvent(excelerant, "exposure", exposure, "grow"),
+    [excelerant]
+  );
+
+  const sendBloomExposure = useCallback(
+    (exposure: ExposureRange) =>
+      sendEvent(excelerant, "exposure", exposure, "bloom"),
+    [excelerant]
+  );
+
   const sendFanSpeed = useCallback(
     (fanSpeed: Number) => sendEvent(excelerant, "fanSpeed", fanSpeed),
     [excelerant]
@@ -110,13 +133,13 @@ export function useExcelerant(): {
 
   return {
     growTemperature,
-    sendGrowTemperature,
     bloomTemperature,
-    sendBloomTemperature,
     growHumidity,
-    sendGrowHumidity,
     bloomHumidity,
-    sendBloomHumidity,
+    growExposure,
+    sendGrowExposure,
+    bloomExposure,
+    sendBloomExposure,
     growPower,
     sendGrowPower,
     bloomPower,

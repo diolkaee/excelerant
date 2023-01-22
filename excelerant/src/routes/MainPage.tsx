@@ -1,29 +1,33 @@
 import { useState } from "react";
 import { ReactComponent as Fan } from "../assets/fan.svg";
-import { useExcelerant } from "../hooks/useExcelerant";
-import Chamber from "./Chamber";
+import { ReactComponent as Logo } from "../assets/logo.svg";
+import { ExposureRange, useExcelerant } from "../hooks/useExcelerant";
+import Chamber from "../components/Chamber";
 
 export default function MainPage() {
-  const [growTargetTemperature, setGrowTargetTemperature] = useState(0);
-  const [growTargetHumidity, setGrowTargetHumidity] = useState(0);
-  const [bloomTargetTemperature, setBloomTargetTemperature] = useState(0);
-  const [bloomTargetHumidity, setBloomTargetHumidity] = useState(0);
   const [targetFanSpeed, setTargetFanSpeed] = useState(0);
+  const [targetGrowExposure, setTargetGrowExposure] = useState<ExposureRange>({
+    start: { hour: 1, minute: 1 },
+    duration: { hour: 2, minute: 2 },
+  });
+  const [targetBloomExposure, setTargetBloomExposure] = useState<ExposureRange>(
+    {
+      start: { hour: 0, minute: 0 },
+      duration: { hour: 0, minute: 0 },
+    }
+  );
 
   const {
     growTemperature,
-    sendGrowTemperature,
     bloomTemperature,
-    sendBloomTemperature,
     growHumidity,
-    sendGrowHumidity,
     bloomHumidity,
-    sendBloomHumidity,
+    sendGrowExposure,
+    sendBloomExposure,
     growPower,
     sendGrowPower,
     bloomPower,
     sendBloomPower,
-    fanSpeed,
     sendFanSpeed,
   } = useExcelerant();
 
@@ -33,22 +37,17 @@ export default function MainPage() {
         hasPower={growPower}
         setHasPower={sendGrowPower}
         currentTemperature={growTemperature}
-        targetTemperature={growTargetTemperature}
-        setTargetTemperature={(temperature) => {
-          setGrowTargetTemperature(temperature);
-          sendGrowTemperature(temperature);
-        }}
         currentHumidity={growHumidity}
-        targetHumidity={growTargetHumidity}
-        setTargetHumidity={(humidity) => {
-          setGrowTargetHumidity(humidity);
-          sendGrowHumidity(humidity);
+        exposure={targetGrowExposure}
+        setExposure={(exposure) => {
+          setTargetGrowExposure(exposure);
+          sendGrowExposure(exposure);
         }}
         className="w-full h-full"
       />
-      <div className="mx-8 h-full w-min">
-        <Fan className="w-full h-min mx-auto fill-white" />
-        <div className="py-8 mt-4 border-4 h-2/3 border-slate-600">
+      <div className="flex flex-col justify-evenly mx-8 h-full w-min">
+        <Logo className="w-40 h-40 mx-auto" />
+        <div className="mx-auto py-8 mt-12 rounded-xl border-4 h-full border-excelerant">
           <input
             type="range"
             min={0}
@@ -60,24 +59,20 @@ export default function MainPage() {
               setTargetFanSpeed(fanSpeed);
               sendFanSpeed(fanSpeed);
             }}
-            className="fan-slider h-full"
+            className="fan-slider h-5/6 accent-excelerant"
           />
+          <Fan className="w-14 h-14 mt-8 mx-auto fill-crystalwhite" />
         </div>
       </div>
       <Chamber
         hasPower={bloomPower}
         setHasPower={sendBloomPower}
         currentTemperature={bloomTemperature}
-        targetTemperature={bloomTargetTemperature}
-        setTargetTemperature={(temperature) => {
-          setBloomTargetTemperature(temperature);
-          sendBloomTemperature(temperature);
-        }}
         currentHumidity={bloomHumidity}
-        targetHumidity={bloomTargetHumidity}
-        setTargetHumidity={(humidity) => {
-          setBloomTargetHumidity(humidity);
-          sendBloomHumidity(humidity);
+        exposure={targetBloomExposure}
+        setExposure={(exposure) => {
+          setTargetBloomExposure(exposure);
+          sendBloomExposure(exposure);
         }}
         className="w-full h-full"
       />
