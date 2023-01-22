@@ -1,4 +1,8 @@
+import { ReactComponent as Power } from "../assets/power.svg";
+
 interface ChamberProps {
+  hasPower: boolean;
+  setHasPower: (hasPower: boolean) => void;
   currentTemperature: number;
   targetTemperature: number;
   setTargetTemperature: (temperatureC: number) => void;
@@ -9,6 +13,8 @@ interface ChamberProps {
 }
 
 export default function Chamber({
+  hasPower,
+  setHasPower,
   currentTemperature,
   targetTemperature,
   setTargetTemperature,
@@ -19,9 +25,9 @@ export default function Chamber({
 }: ChamberProps) {
   return (
     <div
-      className={`flex flex-col px-16 justify-between text-4xl ${className}`}
+      className={`flex flex-col px-16 justify-between items-center text-4xl ${className}`}
     >
-      <div className="flex flex-col">
+      <div className="flex flex-col w-full">
         <div className="flex items-center justify-center">
           <p>{currentTemperature} C°</p>
           {currentTemperature !== targetTemperature && (
@@ -37,7 +43,7 @@ export default function Chamber({
           className="mt-4"
         />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col w-full">
         <div className="flex items-center justify-center">
           <p>{currentHumidity} %</p>
           {currentHumidity !== targetHumidity && (
@@ -53,7 +59,12 @@ export default function Chamber({
           className="mt-4"
         />
       </div>
-      <button>Shutdown</button>
+      <Power
+        className={`${hasPower ? "fill-green-300" : "fill-red-300"} w-1/2`}
+        onClick={() => setHasPower(!hasPower)}
+      >
+        {hasPower ? "Ausschalten" : "Anschalten"}
+      </Power>
     </div>
   );
 }
