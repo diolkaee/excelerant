@@ -4,11 +4,21 @@ from random import randrange
 import websockets
 
 from input import handleEvent
-from output import buildHumidityEvent, buildTemperatureEvent
+from output import buildFanSpeed, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
 
 PORT = os.environ.get('PORT') or 8765
 
 CONNECTION = None
+
+state = {
+    'growTemperature': 0,
+    'bloomTemperature': 0,
+    'growHumidity': 0,
+    'bloomHumdity': 0,
+    'growPower': False,
+    'bloomPower': False,
+    'fanSpeed': 0
+}
 
 
 async def handler(websocket):
@@ -19,19 +29,24 @@ async def handler(websocket):
 
 
 async def handleConnection(websocket):
-    global CONNECTION
+    global CONNECTION, state
     try:
         CONNECTION = websocket
         async for message in websocket:
-            handleEvent(message)
+            handleEvent(message, state)
     finally:
         CONNECTION = None
 
 
 async def sendExampleData(websocket):
     while True:
-        await websocket.send(buildTemperatureEvent(randrange(40)))
-        await websocket.send(buildHumidityEvent(randrange(20)))
+        await websocket.send(buildTemperatureEvent(state['growTemperature'], 'grow'))
+        await websocket.send(buildTemperatureEvent(state['bloomTemperature'], 'bloom'))
+        await websocket.send(buildHumidityEvent(state['growHumidity'], 'grow'))
+        await websocket.send(buildHumidityEvent(state['bloomHumdity'], 'bloom'))
+        await websocket.send(buildPowerEvent(state['growPower'], 'grow'))
+        await websocket.send(buildPowerEvent(state['bloomPower'], 'bloom'))
+        await websocket.send(buildFanSpeed(state['fanSpeed']))
         await asyncio.sleep(2)
 
 
