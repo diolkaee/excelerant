@@ -4,7 +4,7 @@ from random import randrange
 import websockets
 
 from input import handleEvent
-from output import buildFanSpeed, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
+from output import buildExposureEvent, buildFanSpeed, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
 
 PORT = os.environ.get('PORT') or 8765
 
@@ -15,6 +15,8 @@ state = {
     'bloomTemperature': 0,
     'growHumidity': 0,
     'bloomHumdity': 0,
+    'growExposure': {"start": {"hour": 0, "minute": 0}, "end": {"hour": 0, "minute": 0}},
+    'bloomExposure': {"start": {"hour": 0, "minute": 0}, "end": {"hour": 0, "minute": 0}},
     'growPower': False,
     'bloomPower': False,
     'fanSpeed': 0
@@ -44,6 +46,8 @@ async def sendExampleData(websocket):
         await websocket.send(buildTemperatureEvent(state['bloomTemperature'], 'bloom'))
         await websocket.send(buildHumidityEvent(state['growHumidity'], 'grow'))
         await websocket.send(buildHumidityEvent(state['bloomHumdity'], 'bloom'))
+        await websocket.send(buildExposureEvent(state['growExposure'], 'grow'))
+        await websocket.send(buildExposureEvent(state['bloomExposure'], 'bloom'))
         await websocket.send(buildPowerEvent(state['growPower'], 'grow'))
         await websocket.send(buildPowerEvent(state['bloomPower'], 'bloom'))
         await websocket.send(buildFanSpeed(state['fanSpeed']))

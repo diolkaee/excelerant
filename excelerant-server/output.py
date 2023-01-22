@@ -17,6 +17,14 @@ def buildHumidityEvent(humidity, chamber):
     })
 
 
+def buildExposureEvent(exposure, chamber):
+    return json.dumps({
+        "chamber": chamber,
+        "type": "exposure",
+        "value": exposure
+    })
+
+
 def buildPowerEvent(hasPower, chamber):
     return json.dumps({
         "chamber": chamber,

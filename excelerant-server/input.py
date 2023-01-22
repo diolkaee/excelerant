@@ -26,6 +26,8 @@ def handleEvent(event, state):
             handleHumidityInput(value, chamber, state)
         case 'power':
             handlePowerChange(value, chamber, state)
+        case 'exposure':
+            handleExposure(value, chamber, state)
         case 'fanSpeed':
             handleFanSpeedChange(value, state)
 
@@ -46,6 +48,12 @@ def handlePowerChange(isPowered, chamber, state):
     key = 'growPower' if chamber == 'grow' else 'bloomPower'
     state[key] = isPowered
     print(f'Received {key}: {isPowered}')
+
+
+def handleExposure(exposure, chamber, state):
+    key = 'growExposure' if chamber == 'grow' else 'bloomExposure'
+    state[key] = exposure
+    print(f'Received {key}: {exposure}')
 
 
 def handleFanSpeedChange(fanSpeed, state):
