@@ -22,7 +22,7 @@ export default function Chamber({
 }: ChamberProps) {
   return (
     <div
-      className={`flex flex-col px-16 justify-between items-center text-9xl text-crystalwhite ${className}`}
+      className={`flex flex-col px-2 lg:px-16 justify-between items-center text-2xl lg:text-4xl 2xl:text-9xl text-crystalwhite ${className}`}
     >
       <p>{currentTemperature} C°</p>
       <hr className="border-excelerant border border-t-2 w-full" />
@@ -33,7 +33,9 @@ export default function Chamber({
       </button>
       <hr className="border-excelerant border border-t-2 w-full" />
       <Power
-        className={`${hasPower ? "fill-green-300" : "fill-red-300"} w-40 h-40`}
+        className={`${
+          hasPower ? "fill-green-300" : "fill-red-300"
+        } h-20 lg:h-40`}
         onClick={() => setHasPower(!hasPower)}
       />
     </div>

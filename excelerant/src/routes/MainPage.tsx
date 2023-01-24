@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { ReactComponent as Fan } from "../assets/fan.svg";
 import { ReactComponent as Logo } from "../assets/logo.svg";
-import { ExposureRange, useExcelerant } from "../hooks/useExcelerant";
 import Chamber from "../components/Chamber";
+import { ExposureRange, useExcelerant } from "../hooks/useExcelerant";
 
 export default function MainPage() {
   const [targetFanSpeed, setTargetFanSpeed] = useState(0);
@@ -32,7 +32,7 @@ export default function MainPage() {
   } = useExcelerant();
 
   return (
-    <div className="flex w-screen h-screen bg-black py-16">
+    <div className="flex w-screen h-screen bg-black py-8 lg:py-16">
       <Chamber
         hasPower={growPower}
         setHasPower={sendGrowPower}
@@ -45,9 +45,9 @@ export default function MainPage() {
         }}
         className="w-full h-full"
       />
-      <div className="flex flex-col justify-evenly mx-8 h-full w-min">
-        <Logo className="w-40 h-40 mx-auto" />
-        <div className="mx-auto py-8 mt-12 rounded-xl border-4 h-full border-excelerant">
+      <div className="flex flex-col justify-evenly sm:mx-4 lg:mx-8 h-full w-min">
+        <Logo className="h-20 lg:h-40 mx-auto" />
+        <div className="flex flex-col items-center mx-auto px-4 py-8 mt-12 rounded-xl border-4 h-full w-min border-excelerant">
           <input
             type="range"
             min={0}
@@ -59,6 +59,7 @@ export default function MainPage() {
               setTargetFanSpeed(fanSpeed);
               sendFanSpeed(fanSpeed);
             }}
+            orient="vertical"
             className="fan-slider h-5/6 accent-excelerant"
           />
           <Fan className="w-14 h-14 mt-8 mx-auto fill-crystalwhite" />
