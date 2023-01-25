@@ -75,3 +75,14 @@ async def observeFanSpeed(onFanSpeedChange):
             onFanSpeedChange(currentFanSpeed)
             lastFanSpeed = currentFanSpeed
         time.sleep(1)
+
+
+async def observeGrowLight(onGrowLightChange):
+    lastGrowLight = False
+
+    while (True):
+        currentGrowLight = getGrowLight()
+        if (currentGrowLight != lastGrowLight):
+            onGrowLightChange(currentGrowLight)
+            lastGrowLight = currentGrowLight
+        time.sleep(1)

@@ -4,7 +4,7 @@ import websockets
 
 from inputHandler import handleEvent
 from outputHandler import buildExposureEvent, buildFanSpeed, buildFanSpeedEvent, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
-from pixtendController import init, observeFanSpeed
+from pixtendController import init, observeFanSpeed, observeGrowLight
 
 PORT = os.environ.get('PORT') or 8765
 
@@ -43,7 +43,11 @@ async def handleConnection(websocket):
 async def observePixtend(websocket):
     async def onFanSpeedChange(fanSpeed): return await websocket.send(
         buildFanSpeedEvent(fanSpeed))
+    async def onGrowLightChange(growLight): return await websocket.send(
+        buildPowerEvent(growLight, 'grow'))
+
     observeFanSpeed(onFanSpeedChange)
+    observeGrowLight(onGrowLightChange)
 
 
 async def main():
