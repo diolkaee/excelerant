@@ -33,7 +33,7 @@ def buildPowerEvent(hasPower, chamber):
     })
 
 
-def buildFanSpeed(fanSpeed):
+def buildFanSpeedEvent(fanSpeed):
     return json.dumps({
         "type": "fanspeed",
         "value": fanSpeed

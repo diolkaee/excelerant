@@ -1,10 +1,10 @@
 import asyncio
 import os
-from random import randrange
 import websockets
 
-from input import handleEvent
-from output import buildExposureEvent, buildFanSpeed, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
+from inputHandler import handleEvent
+from outputHandler import buildExposureEvent, buildFanSpeed, buildFanSpeedEvent, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
+from pixtendController import init, observeFanSpeed
 
 PORT = os.environ.get('PORT') or 8765
 
@@ -26,7 +26,7 @@ state = {
 async def handler(websocket):
     await asyncio.gather(
         handleConnection(websocket),
-        sendExampleData(websocket)
+        observePixtend(websocket)
     )
 
 
@@ -40,21 +40,14 @@ async def handleConnection(websocket):
         CONNECTION = None
 
 
-async def sendExampleData(websocket):
-    while True:
-        await websocket.send(buildTemperatureEvent(state['growTemperature'], 'grow'))
-        await websocket.send(buildTemperatureEvent(state['bloomTemperature'], 'bloom'))
-        await websocket.send(buildHumidityEvent(state['growHumidity'], 'grow'))
-        await websocket.send(buildHumidityEvent(state['bloomHumdity'], 'bloom'))
-        await websocket.send(buildExposureEvent(state['growExposure'], 'grow'))
-        await websocket.send(buildExposureEvent(state['bloomExposure'], 'bloom'))
-        await websocket.send(buildPowerEvent(state['growPower'], 'grow'))
-        await websocket.send(buildPowerEvent(state['bloomPower'], 'bloom'))
-        await websocket.send(buildFanSpeed(state['fanSpeed']))
-        await asyncio.sleep(2)
+async def observePixtend(websocket):
+    async def onFanSpeedChange(fanSpeed): return await websocket.send(
+        buildFanSpeedEvent(fanSpeed))
+    observeFanSpeed(onFanSpeedChange)
 
 
 async def main():
+    init()
     async with websockets.serve(handler, "localhost", PORT):
         await asyncio.Future()
 
