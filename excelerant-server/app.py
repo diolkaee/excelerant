@@ -3,7 +3,7 @@ import os
 import websockets
 
 from inputHandler import handleEvent
-from outputHandler import buildExposureEvent, buildFanSpeed, buildFanSpeedEvent, buildHumidityEvent, buildPowerEvent, buildTemperatureEvent
+from outputHandler import buildFanSpeedEvent, buildPowerEvent
 from pixtendController import init, observeFanSpeed, observeGrowLight
 
 PORT = os.environ.get('PORT') or 8765
