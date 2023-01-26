@@ -1,7 +1,8 @@
 import asyncio
 from datetime import datetime, time
-from typing import Callable, Optional, Tuple
-from pixtendv2s import PiXtendV2S
+from typing import Callable, Optional, Tuple, Awaitable
+from observer import buildObserver
+# from pixtendv2s import PiXtendV2S
 
 pixtend = None
 
@@ -9,7 +10,7 @@ growTime: Optional[Tuple[time, time]] = None
 bloomTime = None
 
 
-def init():
+def initPixtend():
     global pixtend
     pixtend = PiXtendV2S()
     # Activate indoor humidity sensor
@@ -20,8 +21,13 @@ def init():
     pixtend.gpio1 = True
 
 
+def closePixtend():
+    pixtend.close()
+
+
 def setFanPower(hasPower: bool):
     global pixtend
+    # Never shutdown fan when any light is on
     pixtend.relay0 = hasPower or (getGrowLight() or getBloomLight())
 
 
@@ -35,19 +41,13 @@ def setFanSpeed(percent: float):
     pixtend.analog_out0 = speed
 
 
-async def observeFanSpeed(onFanSpeedChange: Callable[[float], None]):
-    lastFanSpeed = 0
-
-    while (True):
-        currentFanSpeed = getFanSpeed()
-        if (currentFanSpeed != lastFanSpeed):
-            onFanSpeedChange(currentFanSpeed)
-            lastFanSpeed = currentFanSpeed
-        asyncio.sleep(1)
-
-
 def getFanSpeed() -> float:
     return pixtend.analog_out0
+
+
+async def observeFanSpeed(onFanSpeedChange: Callable[[float], Awaitable[None]]):
+    fanObserver = buildObserver(getFanSpeed)
+    await fanObserver(onFanSpeedChange)
 
 
 def setGrowLight(hasPower: bool):
@@ -59,15 +59,9 @@ def getGrowLight() -> bool:
     return pixtend.relay1
 
 
-async def observeGrowLight(onGrowLightChange: Callable[[bool], None]):
-    lastGrowLight = False
-
-    while (True):
-        currentGrowLight = getGrowLight()
-        if (currentGrowLight != lastGrowLight):
-            onGrowLightChange(currentGrowLight)
-            lastGrowLight = currentGrowLight
-        asyncio.sleep(1)
+async def observeGrowLight(onGrowLightChange: Callable[[bool], Awaitable[None]]):
+    growLightObserver = buildObserver(getGrowLight)
+    await growLightObserver(onGrowLightChange)
 
 
 def setBloomLight(hasPower: bool):
@@ -79,24 +73,48 @@ def getBloomLight() -> bool:
     return pixtend.relay2
 
 
+async def observeBloomLight(onBloomLightChange: Callable[[bool], Awaitable[None]]):
+    bloomLightObserver = buildObserver(getBloomLight)
+    await bloomLightObserver(onBloomLightChange)
+
+
 def getGrowHumidity() -> float:
     return pixtend.humid0
+
+
+async def observeGrowHumidity(onGrowHumidityChange: Callable[[float], Awaitable[None]]):
+    growHumidityObserver = buildObserver(getGrowHumidity)
+    await growHumidityObserver(onGrowHumidityChange)
 
 
 def getBloomHumidity() -> float:
     return pixtend.humid1
 
 
+async def observeBloomHumidity(onBloomHumidityChange: Callable[[float], Awaitable[None]]):
+    bloomHumidityObserver = buildObserver(getBloomHumidity)
+    await bloomHumidityObserver(onBloomHumidityChange)
+
+
 def getGrowTemperature() -> float:
     return pixtend.temp0
+
+
+async def observeGrowTemperature(onGrowTemperatureChange: Callable[[float], Awaitable[None]]):
+    growTemperatureObserver = buildObserver(getGrowTemperature)
+    await growTemperatureObserver(onGrowTemperatureChange)
 
 
 def getBloomTemperature() -> float:
     return pixtend.temp1
 
 
+async def observeBloomTemperature(onBloomTemperatureChange: Callable[[float], Awaitable[None]]):
+    bloomTemperatureObserver = buildObserver(getBloomTemperature)
+    await bloomTemperatureObserver(onBloomTemperatureChange)
+
+
 def setGrowTime(start: time, end: time):
-    # Set growtime
     global growTime
     growTime = (start, end)
 
@@ -114,11 +132,10 @@ async def controlGrowTime():
                 setGrowLight(True)
             else:
                 setGrowLight(False)
-        asyncio.sleep(30)
+        await asyncio.sleep(30)
 
 
 def setBloomTime(start: time, end: time):
-    # Set bloomtime
     global bloomTime
     bloomTime = (start, end)
 
@@ -136,7 +153,7 @@ async def controlBloomTime():
                 setBloomLight(True)
             else:
                 setBloomLight(False)
-        asyncio.sleep(30)
+        await asyncio.sleep(30)
 
 
 def is_time_between(time: time, start: time, end: time) -> bool:

@@ -1,5 +1,7 @@
 import json
 
+from pixtendController import setBloomLight, setFanSpeed, setGrowLight
+
 
 def parseEvent(event):
     jsonData = json.loads(event)
@@ -14,48 +16,34 @@ def parseEvent(event):
     if eventValue is None:
         print("No event value given")
 
-    return [eventType, eventValue, eventChamber]
+    return (eventType, eventValue, eventChamber)
 
 
-def handleEvent(event, state):
-    [type, value, chamber] = parseEvent(event)
+def handleEvent(event):
+    (type, value, chamber) = parseEvent(event)
     match type:
-        case 'temperature':
-            handleTemperatureInput(value, chamber, state)
-        case 'humidity':
-            handleHumidityInput(value, chamber, state)
         case 'power':
-            handlePowerChange(value, chamber, state)
+            handlePowerChange(value, chamber)
         case 'exposure':
-            handleExposure(value, chamber, state)
+            handleExposure(value, chamber)
         case 'fanSpeed':
-            handleFanSpeedChange(value, state)
+            handleFanSpeedChange(value)
 
 
-def handleTemperatureInput(temperature, chamber, state):
-    key = 'growTemperature' if chamber == 'grow' else 'bloomTemperature'
-    state[key] = temperature
-    print(f'Received {key}: {temperature}')
+def handlePowerChange(isPowered, chamber):
+    match chamber:
+        case 'grow':
+            setGrowLight(isPowered)
+        case 'bloom':
+            setBloomLight(isPowered)
+        case _:
+            raise ValueError
 
 
-def handleHumidityInput(humidity, chamber, state):
-    key = 'growHumidity' if chamber == 'grow' else 'bloomHumidity'
-    state[key] = humidity
-    print(f'Received {key}: {humidity}')
+def handleExposure(exposure, chamber):
+    # TODO Implement me & define API spec
+    print('Exposure is not implemented yet')
 
 
-def handlePowerChange(isPowered, chamber, state):
-    key = 'growPower' if chamber == 'grow' else 'bloomPower'
-    state[key] = isPowered
-    print(f'Received {key}: {isPowered}')
-
-
-def handleExposure(exposure, chamber, state):
-    key = 'growExposure' if chamber == 'grow' else 'bloomExposure'
-    state[key] = exposure
-    print(f'Received {key}: {exposure}')
-
-
-def handleFanSpeedChange(fanSpeed, state):
-    state['fanSpeed'] = fanSpeed
-    print(f'Received fan speed: {fanSpeed}')
+def handleFanSpeedChange(fanSpeed):
+    setFanSpeed(fanSpeed)

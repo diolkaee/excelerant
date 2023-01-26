@@ -3,57 +3,43 @@ import os
 import websockets
 
 from inputHandler import handleEvent
-from outputHandler import buildFanSpeedEvent, buildPowerEvent
-from pixtendController import init, observeFanSpeed, observeGrowLight
+from outputHandler import observePixtend
+from pixtendController import closePixtend, initPixtend
 
 PORT = os.environ.get('PORT') or 8765
 
 CONNECTION = None
 
-state = {
-    'growTemperature': 0,
-    'bloomTemperature': 0,
-    'growHumidity': 0,
-    'bloomHumdity': 0,
-    'growExposure': {"start": {"hour": 0, "minute": 0}, "end": {"hour": 0, "minute": 0}},
-    'bloomExposure': {"start": {"hour": 0, "minute": 0}, "end": {"hour": 0, "minute": 0}},
-    'growPower': False,
-    'bloomPower': False,
-    'fanSpeed': 0
-}
-
 
 async def handler(websocket):
     await asyncio.gather(
         handleConnection(websocket),
-        observePixtend(websocket)
+        handleUpdates(websocket)
     )
 
 
 async def handleConnection(websocket):
-    global CONNECTION, state
+    global CONNECTION
     try:
         CONNECTION = websocket
+        initPixtend()
         async for message in websocket:
-            handleEvent(message, state)
+            handleEvent(message)
     finally:
         CONNECTION = None
+        closePixtend()
 
 
-async def observePixtend(websocket):
-    async def onFanSpeedChange(fanSpeed): return await websocket.send(
-        buildFanSpeedEvent(fanSpeed))
-    async def onGrowLightChange(growLight): return await websocket.send(
-        buildPowerEvent(growLight, 'grow'))
-
-    observeFanSpeed(onFanSpeedChange)
-    observeGrowLight(onGrowLightChange)
+async def handleUpdates(websocket):
+    async def onUpdate(event: str): return await websocket.send(event)
+    await observePixtend(onUpdate)
 
 
 async def main():
-    init()
     async with websockets.serve(handler, "localhost", PORT):
+        print(f'Starting excelerant server on Port: {PORT}')
         await asyncio.Future()
+
 
 if __name__ == "__main__":
     asyncio.run(main())
