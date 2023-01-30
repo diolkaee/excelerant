@@ -1,0 +1,9 @@
+autopep8==2.0.1
+build==0.10.0
+./lib/dist/excelerant-0.1.0-py3-none-any.whl
+packaging==23.0
+pycodestyle==2.10.0
+pyproject_hooks==1.0.0
+pyserial==3.5
+tomli==2.0.1
+websockets==10.4

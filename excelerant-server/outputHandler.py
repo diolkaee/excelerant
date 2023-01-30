@@ -2,7 +2,6 @@ import asyncio
 import json
 from typing import Awaitable, Callable, Literal
 
-from pixtendController import observeBloomHumidity, observeBloomLight, observeBloomTemperature, observeFanSpeed, observeGrowHumidity, observeGrowLight, observeGrowTemperature
 
 ChamberType = Literal['grow', 'bloom']
 
@@ -47,7 +46,7 @@ def buildFanSpeedEvent(fanSpeed: float) -> str:
     })
 
 
-async def observePixtend(onEvent: Callable[[str], Awaitable[None]]):
+async def observeExcelerant(excelerant, onEvent: Callable[[str], Awaitable[None]]):
     async def onFanSpeedChange(fanSpeed: float): await onEvent(
         buildFanSpeedEvent(fanSpeed))
 
@@ -69,17 +68,20 @@ async def observePixtend(onEvent: Callable[[str], Awaitable[None]]):
     async def onBloomTemperatureChange(bloomTemperature: float): await onEvent(
         buildTemperatureEvent(bloomTemperature, 'bloom'))
 
-    fanSpeedTask = asyncio.create_task(observeFanSpeed(onFanSpeedChange))
-    growLightTask = asyncio.create_task(observeGrowLight(onGrowLightChange))
-    bloomLightTask = asyncio.create_task(observeBloomLight(onBloomLightChange))
+    fanSpeedTask = asyncio.create_task(
+        excelerant.observeFanSpeed(onFanSpeedChange))
+    growLightTask = asyncio.create_task(
+        excelerant.observeGrowLight(onGrowLightChange))
+    bloomLightTask = asyncio.create_task(
+        excelerant.observeBloomLight(onBloomLightChange))
     growHumidityTask = asyncio.create_task(
-        observeGrowHumidity(onGrowHumidityChange))
+        excelerant.observeGrowHumidity(onGrowHumidityChange))
     bloomHumidityTask = asyncio.create_task(
-        observeBloomHumidity(onBloomHumidityChange))
+        excelerant.observeBloomHumidity(onBloomHumidityChange))
     growTemperatureTask = asyncio.create_task(
-        observeGrowTemperature(onGrowTemperatureChange))
+        excelerant.observeGrowTemperature(onGrowTemperatureChange))
     bloomTemperatureTask = asyncio.create_task(
-        observeBloomTemperature(onBloomTemperatureChange))
+        excelerant.observeBloomTemperature(onBloomTemperatureChange))
 
     await fanSpeedTask
     await growLightTask

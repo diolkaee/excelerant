@@ -1,0 +1,7 @@
+__pycache__/
+excelerant-venv/
+pplv2/
+
+**/dist/
+
+.DS_Store

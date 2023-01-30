@@ -1,7 +1,5 @@
 import json
 
-from pixtendController import setBloomLight, setFanSpeed, setGrowLight
-
 
 def parseEvent(event):
     jsonData = json.loads(event)
@@ -19,31 +17,31 @@ def parseEvent(event):
     return (eventType, eventValue, eventChamber)
 
 
-def handleEvent(event):
+def handleEvent(excelerant, event):
     (type, value, chamber) = parseEvent(event)
     match type:
         case 'power':
-            handlePowerChange(value, chamber)
+            handlePowerChange(excelerant, value, chamber)
         case 'exposure':
-            handleExposure(value, chamber)
+            handleExposure(excelerant, value, chamber)
         case 'fanSpeed':
-            handleFanSpeedChange(value)
+            handleFanSpeedChange(excelerant, value)
 
 
-def handlePowerChange(isPowered, chamber):
+def handlePowerChange(excelerant, isPowered, chamber):
     match chamber:
         case 'grow':
-            setGrowLight(isPowered)
+            excelerant.setGrowLight(isPowered)
         case 'bloom':
-            setBloomLight(isPowered)
+            excelerant.setBloomLight(isPowered)
         case _:
             raise ValueError
 
 
-def handleExposure(exposure, chamber):
+def handleExposure(excelerant, exposure, chamber):
     # TODO Implement me & define API spec
     print('Exposure is not implemented yet')
 
 
-def handleFanSpeedChange(fanSpeed):
-    setFanSpeed(fanSpeed)
+def handleFanSpeedChange(excelerant, fanSpeed):
+    excelerant.setFanSpeed(fanSpeed)
